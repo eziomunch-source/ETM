@@ -1,4 +1,4 @@
-package Engine
+package ETEngine
 
 type Game struct {
 	Elements []*Sprite

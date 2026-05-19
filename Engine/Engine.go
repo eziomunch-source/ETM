@@ -1,4 +1,4 @@
-package Engine
+package ETEngine
 
 import (
 	"log"

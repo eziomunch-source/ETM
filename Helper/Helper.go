@@ -1,4 +1,4 @@
-package ETMhelper
+package ETEhelper
 
 import (
 	"encoding/json"
