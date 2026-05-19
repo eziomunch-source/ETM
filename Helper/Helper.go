@@ -64,7 +64,7 @@ func TiledMapToImage(Map *tiled.Map) image.Image {
 	}
 
 	// Render just layer 0 to the Renderer.
-	err = renderer.RenderLayer(0)
+	err = renderer.RenderVisibleLayers()
 	if err != nil {
 		fmt.Println("layer unsupported for rendering: " + err.Error())
 		os.Exit(2)
