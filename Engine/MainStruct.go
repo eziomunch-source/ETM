@@ -7,7 +7,7 @@ type Game struct {
 
 type Sprite struct {
 	Image     string
-	Pos, Size [2]float32
+	Pos, Size [2]float64
 	Rotation  float64
 	Layer     int
 }
@@ -20,7 +20,7 @@ type Config struct {
 	MapsPath     string
 	StartMap     string
 	JsonMapPath  string
-	CameraOffset [2]float32
+	CameraOffset [2]float64
 }
 
 type Map struct {
