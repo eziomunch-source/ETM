@@ -1,7 +1,7 @@
 package assets
 
 import (
-	ETMhelper "github.com/eziomunch-source/ETM/Helper"
+	ETMhelper "github.com/Try-si/ETM/Helper"
 	"github.com/hajimehoshi/ebiten"
 )
 

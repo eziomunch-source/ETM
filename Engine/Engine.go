@@ -4,8 +4,8 @@ import (
 	"log"
 	"sort"
 
-	assets "github.com/eziomunch-source/ETM/Assets"
-	ETMhelper "github.com/eziomunch-source/ETM/Helper"
+	assets "github.com/Try-si/ETM/Assets"
+	ETMhelper "github.com/Try-si/ETM/Helper"
 	"github.com/hajimehoshi/ebiten"
 )
 

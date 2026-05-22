@@ -1,4 +1,4 @@
-module github.com/eziomunch-source/ETM
+module github.com/Try-si/ETM
 
 go 1.25.2
 
