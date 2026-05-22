@@ -63,7 +63,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(element.Pos[0]), float64(element.Pos[1]))
+		opts.GeoM.Translate(float64(element.Pos[0]-Conf.CameraOffset[0]), float64(element.Pos[1]+Conf.CameraOffset[1]))
 		opts.GeoM.Rotate(element.Rotation)
 		if element.Size[0] != 0 && element.Size[1] != 0 {
 			opts.GeoM.Scale(float64(element.Size[0])/float64(img.Bounds().Dx()), float64(element.Size[1])/float64(img.Bounds().Dy()))

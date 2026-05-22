@@ -20,6 +20,7 @@ type Config struct {
 	MapsPath     string
 	StartMap     string
 	JsonMapPath  string
+	CameraOffset [2]int
 }
 
 type Map struct {
