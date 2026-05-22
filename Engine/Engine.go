@@ -94,8 +94,8 @@ func (g *Game) SetScene(Map string) {
 	mapImg := Assets.Maps[Maps[Map].Map]
 	g.Map = &Sprite{
 		Image:    Maps[Map].Map,
-		Pos:      [2]int{0, 0},
-		Size:     [2]int{mapImg.Bounds().Dx(), mapImg.Bounds().Dy()},
+		Pos:      [2]float32{0, 0},
+		Size:     [2]float32{float32(mapImg.Bounds().Dx()), float32(mapImg.Bounds().Dy())},
 		Rotation: 0,
 		Layer:    -100,
 	}
