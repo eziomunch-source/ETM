@@ -14,10 +14,10 @@ var (
 	Maps       map[string]Map
 	Assets     assets.Assets
 	Gam        *Game
-	UpdateFunc func() error
+	UpdateFunc func(float64) error
 )
 
-func Init(update func() error) {
+func Init(update func(float64) error) {
 	Conf = ETMhelper.Jsontostruct[Config]("config.json")
 	UpdateFunc = update
 
@@ -48,7 +48,7 @@ func GameLoop() {
 }
 
 func (g *Game) Update(screen *ebiten.Image) error {
-	return UpdateFunc()
+	return UpdateFunc(ebiten.CurrentFPS())
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
