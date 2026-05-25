@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"sort"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	ebiten "github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type AssetsProvider interface {
@@ -85,8 +85,8 @@ func (g *Game) SetScene(Map string, MapImage *ebiten.Image) {
 	}
 }
 
-func (g *Game) Update(screen *ebiten.Image) error {
-	return g.UpdateFunc(ebiten.CurrentFPS())
+func (g *Game) Update() error {
+	return g.UpdateFunc(ebiten.ActualFPS())
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -128,8 +128,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	for _, element := range g.Elements {
-		posX := (element.Pos[0] - g.Conf.CameraOffset[0]) / 2
-		posY := (element.Pos[1] + g.Conf.CameraOffset[1]) / 2
+		posX := (element.Pos[0] - g.Conf.CameraOffset[0])
+		posY := (element.Pos[1] + g.Conf.CameraOffset[1])
 
 		whith := element.Box[0]
 		height := element.Box[1]

@@ -6,7 +6,7 @@ import (
 	assets "github.com/Try-si/ETM/Assets"
 	ETEStruct "github.com/Try-si/ETM/ETEStruct"
 	ETMhelper "github.com/Try-si/ETM/Helper"
-	"github.com/hajimehoshi/ebiten"
+	ebiten "github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
