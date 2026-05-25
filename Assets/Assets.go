@@ -33,4 +33,15 @@ func (a *Assets) Init() {
 			panic(err)
 		}
 	}
+
+}
+
+func (a *Assets) GetImage(name string) (*ebiten.Image, bool) {
+	img, exists := a.Images[name]
+	return img, exists
+}
+
+func (a *Assets) GetMap(name string) (*ebiten.Image, bool) {
+	img, exists := a.Maps[name]
+	return img, exists
 }

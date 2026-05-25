@@ -6,6 +6,7 @@ import (
 	"image"
 	"os"
 
+	ETEStruct "github.com/Try-si/ETM/ETEStruct"
 	Math "github.com/Try-si/MathHelper/Math"
 	tiled "github.com/lafriks/go-tiled"
 	render "github.com/lafriks/go-tiled/render"
@@ -109,8 +110,8 @@ func GetAllImagesInDirectory(path string) map[string]image.Image {
 	return result
 }
 
-func IsInCollision(box [4]float64, Elements []*Sprite, CellSize float64) bool { // box[width, height, x, y]
-	HashWorld := GetElementByHashMap(Elements, CellSize)
+func IsInCollision(box [4]float64, Elements []*ETEStruct.Sprite, CellSize float64) bool { // box[width, height, x, y]
+	HashWorld := ETEStruct.GetElementByHashMap(Elements, CellSize)
 
 	key := [2]int{
 		int(Elements[0].Pos[0] / CellSize),
@@ -123,7 +124,7 @@ func IsInCollision(box [4]float64, Elements []*Sprite, CellSize float64) bool { 
 	keyRight := string(key[0]+int(CellSize)) + "_" + string(key[1])
 	keyMiddle := string(key[0]) + "_" + string(key[1])
 
-	World := make([]*Sprite, 0)
+	World := make([]*ETEStruct.Sprite, 0)
 
 	for h, elements := range HashWorld {
 		if h == keyUp {
@@ -203,21 +204,4 @@ func IsInCollision(box [4]float64, Elements []*Sprite, CellSize float64) bool { 
 	}
 
 	return false
-}
-
-func GetElementByHashMap(Elements []*Sprite, CellSize float64) map[string][]*Sprite {
-	result := make(map[string][]*Sprite)
-	for _, element := range Elements {
-		key := string(int(element.Pos[0]/CellSize)) + "_" + string(int(element.Pos[1]/CellSize))
-		result[key] = append(result[key], element)
-	}
-	return result
-}
-
-type Sprite struct {
-	Image     string
-	Pos, Size [2]float64
-	Rotation  float64
-	Layer     int
-	Box       [2]float64
 }

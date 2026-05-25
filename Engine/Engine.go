@@ -4,13 +4,14 @@ import (
 	"log"
 
 	assets "github.com/Try-si/ETM/Assets"
+	ETEStruct "github.com/Try-si/ETM/ETEStruct"
 	ETMhelper "github.com/Try-si/ETM/Helper"
-	ETEStruct "github.com/Try-si/ETM/Struct"
 	"github.com/hajimehoshi/ebiten"
 )
 
 var (
-	Gam *ETEStruct.Game
+	Gam    *ETEStruct.Game
+	Assets assets.Assets
 )
 
 func Init(update func(float64) error) {
@@ -19,10 +20,12 @@ func Init(update func(float64) error) {
 	Gam.Conf = ETMhelper.Jsontostruct[ETEStruct.Config]("config.json")
 	Gam.UpdateFunc = update
 
-	Gam.Assets = assets.Assets{}
-	Gam.Assets.SpritePath = Gam.Conf.SpritePath
-	Gam.Assets.MapsPath = Gam.Conf.MapsPath
-	Gam.Assets.Init()
+	Assets = assets.Assets{}
+	Assets.SpritePath = Gam.Conf.SpritePath
+	Assets.MapsPath = Gam.Conf.MapsPath
+	Assets.Init()
+
+	Gam.Assets = &Assets
 
 	Gam.Maps = make(map[string]ETEStruct.Map)
 
@@ -32,7 +35,7 @@ func Init(update func(float64) error) {
 		Gam.Maps[mapData.Name] = mapData.Obj
 	}
 
-	Gam.SetScene(Gam.Conf.StartMap)
+	Gam.SetScene(Gam.Conf.StartMap, Assets.Maps[Gam.Conf.StartMap])
 }
 
 func GameLoop() {
