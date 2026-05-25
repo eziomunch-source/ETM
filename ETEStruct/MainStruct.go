@@ -1,9 +1,11 @@
 package ETEStruct
 
 import (
+	"image/color"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 type AssetsProvider interface {
@@ -53,6 +55,19 @@ func GetElementByHashMap(Elements []*Sprite, cellSize float64) map[string][]*Spr
 		result[key] = append(result[key], element)
 	}
 	return result
+}
+
+func drawCircle(screen *ebiten.Image, x, y, radius float64, clr color.Color) {
+	centerX, centerY := int(x+radius), int(y+radius)
+	r := int(radius)
+
+	for dy := -r; dy <= r; dy++ {
+		for dx := -r; dx <= r; dx++ {
+			if dx*dx+dy*dy <= r*r {
+				screen.Set(centerX+dx, centerY+dy, clr)
+			}
+		}
+	}
 }
 
 func (g *Game) SetScene(Map string, MapImage *ebiten.Image) {
@@ -110,5 +125,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opts.GeoM.Scale(1, 1)
 		}
 		screen.DrawImage(img, opts)
+	}
+
+	for _, element := range g.Elements {
+		posX := element.Pos[0]
+		posY := element.Pos[1]
+
+		whith := element.Box[0]
+		height := element.Box[1]
+
+		if whith == 0 || height == 0 {
+			continue
+		} else if height == 0 {
+			//Draw circle
+			drawCircle(screen, posX, posY, whith, color.RGBA{255, 255, 255, 128})
+		} else {
+			//Draw rectangle
+			ebitenutil.DrawRect(screen, posX, posY, whith, height, color.RGBA{255, 255, 255, 128})
+		}
 	}
 }
