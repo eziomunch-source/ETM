@@ -28,7 +28,7 @@ type Sprite struct {
 	Pos, Size [2]float64
 	Rotation  float64
 	Layer     int
-	Box       [2]float64
+	Box       [4]float64
 }
 
 type Config struct {
@@ -133,6 +133,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		whith := element.Box[0]
 		height := element.Box[1]
+
+		if element.Box[2] != 0 {
+			posX += element.Box[2]
+		}
+		if element.Box[3] != 0 {
+			posY += element.Box[3]
+		}
 
 		if whith == 0 || height == 0 {
 			continue
