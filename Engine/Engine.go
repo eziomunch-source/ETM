@@ -35,7 +35,8 @@ func Init(update func(float64) error) {
 		Gam.Maps[mapData.Name] = mapData.Obj
 	}
 
-	Gam.SetScene(Gam.Conf.StartMap, Assets.Maps[Gam.Conf.StartMap])
+	startMapData := Gam.Maps[Gam.Conf.StartMap]
+	Gam.SetScene(Gam.Conf.StartMap, Assets.Maps[startMapData.Map])
 }
 
 func GameLoop() {
