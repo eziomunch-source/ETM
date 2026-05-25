@@ -110,7 +110,7 @@ func GetAllImagesInDirectory(path string) map[string]image.Image {
 	return result
 }
 
-func IsInCollision(box [4]float64, Elements []*ETEStruct.Sprite, CellSize float64) bool { // box[width, height, x, y]
+func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float64) bool { // box[width, height, x, y]
 	HashWorld := ETEStruct.GetElementByHashMap(Elements, CellSize)
 
 	key := [2]int{

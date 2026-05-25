@@ -141,7 +141,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			posY += element.Box[3]
 		}
 
-		if whith == 0 || height == 0 {
+		if whith == 0 && height == 0 {
 			continue
 		} else if height == 0 {
 			//Draw circle
