@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"math"
 	"os"
 
 	ETEStruct "github.com/Try-si/ETM/ETEStruct"
-	Math "github.com/Try-si/MathHelper/Math"
 	tiled "github.com/lafriks/go-tiled"
 	render "github.com/lafriks/go-tiled/render"
 )
@@ -149,54 +149,76 @@ func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float6
 		}
 	}
 
-	if box[1] == 0 {
-		for _, element := range World {
+	// Vérifié les collisions
+	for _, element := range World {
+		elementX := element.Pos[0] + element.Box[2]
+		elementY := element.Pos[1] + element.Box[3]
+
+		if box[1] == 0 {
+			// Box is a circle
 			if element.Box[1] == 0 {
-				if Math.V2Distance([2]float64{box[4], box[5]}, [2]float64{element.Pos[0], element.Pos[1]}) < element.Box[0]+box[0] {
+				// Circle vs Circle
+				dx := box[4] - elementX
+				dy := box[5] - elementY
+				distance := math.Sqrt(dx*dx + dy*dy)
+				if distance < box[0]+element.Box[0] {
 					return true
 				}
 			} else {
-				if Math.V2Distance([2]float64{box[4], box[5]}, [2]float64{element.Pos[0], element.Pos[1]}) < Math.V2Length([2]float64{element.Box[0], element.Box[1]})+box[0] {
-					return true
-				}
-			}
-		}
-	} else {
-		for _, element := range World {
-			if element.Box[1] == 0 {
-				// 1. Trouver le point le plus proche sur le rectangle (clamp)
+				// Circle vs Rectangle
 				closestX := box[4]
-				if element.Pos[0] < box[4] {
-					closestX = box[4] // cercle à gauche
-				} else if element.Pos[0] > box[4]+box[0] {
-					closestX = box[4] + box[0] // cercle à droite
-				} else {
-					closestX = element.Pos[0] // cercle dans le rectangle (en X)
+				if elementX < box[4] {
+					closestX = elementX
+				} else if elementX > box[4]+element.Box[0] {
+					closestX = box[4] + element.Box[0]
 				}
 
 				closestY := box[5]
-				if element.Pos[1] < box[5] {
-					closestY = box[5] // cercle en haut
-				} else if element.Pos[1] > box[5]+box[1] {
-					closestY = box[5] + box[1] // cercle en bas
-				} else {
-					closestY = element.Pos[1] // cercle dans le rectangle (en Y)
+				if elementY < box[5] {
+					closestY = elementY
+				} else if elementY > box[5]+element.Box[1] {
+					closestY = box[5] + element.Box[1]
 				}
 
-				// 2. Calculer la distance au carré (évite sqrt)
-				distanceX := element.Pos[0] - closestX
-				distanceY := element.Pos[1] - closestY
-				distanceSquared := distanceX*distanceX + distanceY*distanceY
+				dx := box[4] - closestX
+				dy := box[5] - closestY
+				distanceSquared := dx*dx + dy*dy
 
-				// 3. Comparer au rayon au carré
+				if distanceSquared < box[0]*box[0] {
+					return true
+				}
+			}
+		} else {
+			// Box is a rectangle
+			if element.Box[1] == 0 {
+				// Rectangle vs Circle
+				closestX := elementX
+				if box[4] < elementX {
+					closestX = box[4]
+				} else if box[4]+box[0] > elementX {
+					closestX = box[4] + box[0]
+				}
+
+				closestY := elementY
+				if box[5] < elementY {
+					closestY = box[5]
+				} else if box[5]+box[1] > elementY {
+					closestY = box[5] + box[1]
+				}
+
+				dx := elementX - closestX
+				dy := elementY - closestY
+				distanceSquared := dx*dx + dy*dy
+
 				if distanceSquared < element.Box[0]*element.Box[0] {
 					return true
 				}
 			} else {
-				if box[4] < element.Pos[0]+element.Box[0] && // bord gauche box < bord droit element
-					box[4]+box[0] > element.Pos[0] && // bord droit box > bord gauche element
-					box[5] < element.Pos[1]+element.Box[1] && // bord haut box < bord bas element
-					box[5]+box[1] > element.Pos[1] { // bord bas box > bord haut element
+				// Rectangle vs Rectangle
+				if box[4] < elementX+element.Box[0] &&
+					box[4]+box[0] > elementX &&
+					box[5] < elementY+element.Box[1] &&
+					box[5]+box[1] > elementY {
 					return true
 				}
 			}
