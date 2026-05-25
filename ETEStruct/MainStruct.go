@@ -21,6 +21,8 @@ type Game struct {
 	Assets     AssetsProvider
 	Maps       map[string]Map
 	Conf       Config
+
+	Debug bool
 }
 
 type Sprite struct {
@@ -106,6 +108,7 @@ func (g *Game) GetElementByLayer() []*Sprite {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+
 	for _, element := range g.GetElementByLayer() {
 		img, exists := g.Assets.GetImage(element.Image)
 		if !exists {
@@ -113,6 +116,29 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			if !exists {
 				continue
+			}
+		} else if g.Debug {
+			posX := (element.Pos[0] - g.Conf.CameraOffset[0])
+			posY := (element.Pos[1] + g.Conf.CameraOffset[1])
+
+			whith := element.Box[0]
+			height := element.Box[1]
+
+			if element.Box[2] != 0 {
+				posX += element.Box[2]
+			}
+			if element.Box[3] != 0 {
+				posY += element.Box[3]
+			}
+
+			if whith == 0 && height == 0 {
+				continue
+			} else if height == 0 {
+				//Draw circle
+				drawCircle(screen, posX, posY, whith, color.RGBA{255, 255, 255, 128})
+			} else {
+				//Draw rectangle
+				ebitenutil.DrawRect(screen, posX, posY, whith, height, color.RGBA{255, 255, 255, 128})
 			}
 		}
 
@@ -125,30 +151,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opts.GeoM.Scale(1, 1)
 		}
 		screen.DrawImage(img, opts)
-	}
-
-	for _, element := range g.Elements {
-		posX := (element.Pos[0] - g.Conf.CameraOffset[0])
-		posY := (element.Pos[1] + g.Conf.CameraOffset[1])
-
-		whith := element.Box[0]
-		height := element.Box[1]
-
-		if element.Box[2] != 0 {
-			posX += element.Box[2]
-		}
-		if element.Box[3] != 0 {
-			posY += element.Box[3]
-		}
-
-		if whith == 0 && height == 0 {
-			continue
-		} else if height == 0 {
-			//Draw circle
-			drawCircle(screen, posX, posY, whith, color.RGBA{255, 255, 255, 128})
-		} else {
-			//Draw rectangle
-			ebitenutil.DrawRect(screen, posX, posY, whith, height, color.RGBA{255, 255, 255, 128})
-		}
 	}
 }

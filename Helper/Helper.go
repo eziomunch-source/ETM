@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
-	"math"
 	"os"
 
 	ETEStruct "github.com/Try-si/ETM/ETEStruct"
+	math "github.com/Try-si/MathHelper/Math"
 	tiled "github.com/lafriks/go-tiled"
 	render "github.com/lafriks/go-tiled/render"
+	"github.com/solarlune/resolv"
 )
 
 func Jsontostruct[T any](path string) T {
@@ -110,120 +111,64 @@ func GetAllImagesInDirectory(path string) map[string]image.Image {
 	return result
 }
 
-func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float64) bool { // box[width, height, offsetX, offsetY, x, y]
-	HashWorld := ETEStruct.GetElementByHashMap(Elements, CellSize)
-
-	key := [2]int{
-		int(Elements[0].Pos[0] / CellSize),
-		int(Elements[0].Pos[1] / CellSize),
-	}
-
-	keyUp := string(key[0]) + "_" + string(key[1]+int(CellSize))
-	keyDown := string(key[0]) + "_" + string(key[1]-int(CellSize))
-	keyLeft := string(key[0]-int(CellSize)) + "_" + string(key[1])
-	keyRight := string(key[0]+int(CellSize)) + "_" + string(key[1])
-	keyMiddle := string(key[0]) + "_" + string(key[1])
-
-	World := make([]*ETEStruct.Sprite, 0)
-
-	for h, elements := range HashWorld {
-		if h == keyUp {
-			World = append(World, elements...)
-			// TODO: check collision
-		}
-		if h == keyDown {
-			World = append(World, elements...)
-			// TODO: check collision
-		}
-		if h == keyLeft {
-			World = append(World, elements...)
-			// TODO: check collision
-		}
-		if h == keyRight {
-			World = append(World, elements...)
-			// TODO: check collision
-		}
-		if h == keyMiddle {
-			World = append(World, elements...)
-			// TODO: check collision
-		}
-	}
-
-	// Vérifié les collisions
-	for _, element := range World {
-		elementX := element.Pos[0] + element.Box[2]
-		elementY := element.Pos[1] + element.Box[3]
-
-		if box[1] == 0 {
-			// Box is a circle
-			if element.Box[1] == 0 {
-				// Circle vs Circle
-				dx := box[4] - elementX
-				dy := box[5] - elementY
-				distance := math.Sqrt(dx*dx + dy*dy)
-				if distance < box[0]+element.Box[0] {
-					return true
-				}
-			} else {
-				// Circle vs Rectangle
-				closestX := box[4]
-				if elementX < box[4] {
-					closestX = elementX
-				} else if elementX > box[4]+element.Box[0] {
-					closestX = box[4] + element.Box[0]
-				}
-
-				closestY := box[5]
-				if elementY < box[5] {
-					closestY = elementY
-				} else if elementY > box[5]+element.Box[1] {
-					closestY = box[5] + element.Box[1]
-				}
-
-				dx := box[4] - closestX
-				dy := box[5] - closestY
-				distanceSquared := dx*dx + dy*dy
-
-				if distanceSquared < box[0]*box[0] {
-					return true
-				}
-			}
-		} else {
-			// Box is a rectangle
-			if element.Box[1] == 0 {
-				// Rectangle vs Circle
-				closestX := elementX
-				if box[4] < elementX {
-					closestX = box[4]
-				} else if box[4]+box[0] > elementX {
-					closestX = box[4] + box[0]
-				}
-
-				closestY := elementY
-				if box[5] < elementY {
-					closestY = box[5]
-				} else if box[5]+box[1] > elementY {
-					closestY = box[5] + box[1]
-				}
-
-				dx := elementX - closestX
-				dy := elementY - closestY
-				distanceSquared := dx*dx + dy*dy
-
-				if distanceSquared < element.Box[0]*element.Box[0] {
-					return true
-				}
-			} else {
-				// Rectangle vs Rectangle
-				if box[4] < elementX+element.Box[0] &&
-					box[4]+box[0] > elementX &&
-					box[5] < elementY+element.Box[1] &&
-					box[5]+box[1] > elementY {
-					return true
-				}
+func CheckCollision(box [6]float64, elements []*ETEStruct.Sprite, maxDist int) bool {
+	for _, element := range elements {
+		Box := ElementToBox(element)
+		if math.V2Distance([2]float64{box[4], box[5]}, [2]float64{Box[4], Box[5]}) <= float64(maxDist) {
+			if CheckIntersection([2][6]float64{box, Box}) {
+				return true
 			}
 		}
 	}
 
 	return false
+}
+
+func CheckIntersection(boxs [2][6]float64) bool { // {witdh height  offsetX offsetY  PosX, PosY}
+	if boxs[0][1] == 0 {
+		if boxs[1][1] == 0 {
+			// Cercle vs Cercle
+
+			Obj0 := resolv.NewCircle(boxs[0][4], boxs[0][5], boxs[0][0])
+			Obj1 := resolv.NewCircle(boxs[1][4], boxs[1][5], boxs[1][0])
+
+			if !Obj0.Intersection(Obj1).IsEmpty() {
+				return true
+			}
+		} else {
+			// Cercle vs Rectangle
+
+			Obj0 := resolv.NewCircle(boxs[0][4], boxs[0][5], boxs[0][0])
+			Obj1 := resolv.NewRectangle(boxs[1][4], boxs[1][5], boxs[1][0], boxs[1][1])
+
+			if !Obj0.Intersection(Obj1).IsEmpty() {
+				return true
+			}
+		}
+	} else {
+		if boxs[1][1] == 0 {
+			//Rectangle vs Cercle
+
+			Obj0 := resolv.NewRectangle(boxs[0][4], boxs[0][5], boxs[0][0], boxs[0][1])
+			Obj1 := resolv.NewCircle(boxs[1][4], boxs[1][5], boxs[1][0])
+
+			if !Obj0.Intersection(Obj1).IsEmpty() {
+				return true
+			}
+		} else {
+			// Rectangle vs Rectangle
+
+			Obj0 := resolv.NewRectangle(boxs[0][4], boxs[0][5], boxs[0][0], boxs[0][1])
+			Obj1 := resolv.NewRectangle(boxs[1][4], boxs[1][5], boxs[1][0], boxs[1][1])
+
+			if !Obj0.Intersection(Obj1).IsEmpty() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func ElementToBox(element *ETEStruct.Sprite) [6]float64 {
+	return [6]float64{element.Box[0], element.Box[1], element.Box[2], element.Box[3], element.Pos[0] + element.Box[2], element.Pos[1] + element.Box[3]}
 }
