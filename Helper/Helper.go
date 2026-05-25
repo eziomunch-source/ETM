@@ -110,7 +110,7 @@ func GetAllImagesInDirectory(path string) map[string]image.Image {
 	return result
 }
 
-func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float64) bool { // box[width, height, x, y]
+func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float64) bool { // box[width, height, offsetX, offsetY, x, y]
 	HashWorld := ETEStruct.GetElementByHashMap(Elements, CellSize)
 
 	key := [2]int{
@@ -152,11 +152,11 @@ func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float6
 	if box[1] == 0 {
 		for _, element := range World {
 			if element.Box[1] == 0 {
-				if Math.V2Distance([2]float64{box[2], box[3]}, [2]float64{element.Pos[0], element.Pos[1]}) < element.Box[0]+box[0] {
+				if Math.V2Distance([2]float64{box[4], box[5]}, [2]float64{element.Pos[0], element.Pos[1]}) < element.Box[0]+box[0] {
 					return true
 				}
 			} else {
-				if Math.V2Distance([2]float64{box[2], box[3]}, [2]float64{element.Pos[0], element.Pos[1]}) < Math.V2Length([2]float64{element.Box[0], element.Box[1]})+box[0] {
+				if Math.V2Distance([2]float64{box[4], box[5]}, [2]float64{element.Pos[0], element.Pos[1]}) < Math.V2Length([2]float64{element.Box[0], element.Box[1]})+box[0] {
 					return true
 				}
 			}
@@ -165,20 +165,20 @@ func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float6
 		for _, element := range World {
 			if element.Box[1] == 0 {
 				// 1. Trouver le point le plus proche sur le rectangle (clamp)
-				closestX := box[2]
-				if element.Pos[0] < box[2] {
-					closestX = box[2] // cercle à gauche
-				} else if element.Pos[0] > box[2]+box[0] {
-					closestX = box[2] + box[0] // cercle à droite
+				closestX := box[4]
+				if element.Pos[0] < box[4] {
+					closestX = box[4] // cercle à gauche
+				} else if element.Pos[0] > box[4]+box[0] {
+					closestX = box[4] + box[0] // cercle à droite
 				} else {
 					closestX = element.Pos[0] // cercle dans le rectangle (en X)
 				}
 
-				closestY := box[3]
-				if element.Pos[1] < box[3] {
-					closestY = box[3] // cercle en haut
-				} else if element.Pos[1] > box[3]+box[1] {
-					closestY = box[3] + box[1] // cercle en bas
+				closestY := box[5]
+				if element.Pos[1] < box[5] {
+					closestY = box[5] // cercle en haut
+				} else if element.Pos[1] > box[5]+box[1] {
+					closestY = box[5] + box[1] // cercle en bas
 				} else {
 					closestY = element.Pos[1] // cercle dans le rectangle (en Y)
 				}
@@ -193,10 +193,10 @@ func IsInCollision(box [6]float64, Elements []*ETEStruct.Sprite, CellSize float6
 					return true
 				}
 			} else {
-				if box[2] < element.Pos[0]+element.Box[0] && // bord gauche box < bord droit element
-					box[2]+box[0] > element.Pos[0] && // bord droit box > bord gauche element
-					box[3] < element.Pos[1]+element.Box[1] && // bord haut box < bord bas element
-					box[3]+box[1] > element.Pos[1] { // bord bas box > bord haut element
+				if box[4] < element.Pos[0]+element.Box[0] && // bord gauche box < bord droit element
+					box[4]+box[0] > element.Pos[0] && // bord droit box > bord gauche element
+					box[5] < element.Pos[1]+element.Box[1] && // bord haut box < bord bas element
+					box[5]+box[1] > element.Pos[1] { // bord bas box > bord haut element
 					return true
 				}
 			}
