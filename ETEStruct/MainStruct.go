@@ -2,6 +2,7 @@ package ETEStruct
 
 import (
 	"image/color"
+	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten"
@@ -128,8 +129,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	for _, element := range g.Elements {
-		posX := element.Pos[0] - g.Conf.CameraOffset[0]
-		posY := element.Pos[1] + g.Conf.CameraOffset[1]
+		posX := (element.Pos[0] - g.Conf.CameraOffset[0]) * math.Sqrt(element.Size[0])
+		posY := (element.Pos[1] + g.Conf.CameraOffset[1]) * math.Sqrt(element.Size[1])
 
 		whith := element.Box[0]
 		height := element.Box[1]
