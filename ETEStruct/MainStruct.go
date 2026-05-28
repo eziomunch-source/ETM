@@ -43,6 +43,7 @@ type Config struct {
 	JsonMapPath  string
 	CameraOffset [2]float64
 	CellSize     float64
+	Zoom         float64
 }
 
 type Map struct {
@@ -143,8 +144,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		opts := &ebiten.DrawImageOptions{}
+
+		// Rotate Caméra
+
+		// Zoom
+		screenWidth, screenHeight := screen.Size()
+		opts.GeoM.Translate(-float64(screenWidth)/2, -float64(screenHeight)/2)
+		opts.GeoM.Scale(g.Conf.Zoom, g.Conf.Zoom)
+		opts.GeoM.Translate(float64(screenWidth)/2, float64(screenHeight)/2)
+
+		// Position
 		opts.GeoM.Translate(float64(element.Pos[0]-g.Conf.CameraOffset[0]), float64(element.Pos[1]+g.Conf.CameraOffset[1]))
 		opts.GeoM.Rotate(element.Rotation)
+
+		// Scale
 		if element.Size[0] != 0 && element.Size[1] != 0 {
 			opts.GeoM.Scale(float64(element.Size[0])/float64(img.Bounds().Dx()), float64(element.Size[1])/float64(img.Bounds().Dy()))
 		} else {
