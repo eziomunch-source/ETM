@@ -13,27 +13,27 @@ import (
 	"github.com/solarlune/resolv"
 )
 
-func Jsontostruct[T any](path string) T {
-	t := *new(T)
-	data, err := os.ReadFile(path)
-	if err != nil {
+func Jsontostruct[T any](path string) T { // convertir un fichier json en struct
+	t := *new(T)                   // créer une nouvelle instance de T
+	data, err := os.ReadFile(path) // lire le fichier
+	if err != nil {                // si une erreur est survenue
 		return *new(T)
 	}
-	err = json.Unmarshal(data, &t)
-	if err != nil {
+	err = json.Unmarshal(data, &t) // déserialiser le json
+	if err != nil {                // si une erreur est survenue
 		return *new(T)
 	}
 	return t
 }
 
-func GetAllFilesInDirectory(path string) []string {
-	files, err := os.ReadDir(path)
-	if err != nil {
+func GetAllFilesInDirectory(path string) []string { // obtenir tous les fichiers dans un dossier
+	files, err := os.ReadDir(path) // lire le dossier
+	if err != nil {                // si une erreur est survenue
 		return nil
 	}
-	result := make([]string, len(files))
-	for i, file := range files {
-		result[i] = file.Name()
+	result := make([]string, len(files)) // créer un slice de string
+	for i, file := range files {         // pour chaque fichier
+		result[i] = file.Name() // ajouter le nom du fichier au slice
 	}
 	return result
 }
@@ -43,12 +43,12 @@ func GetAllFilesInDirectoryToStruct[T any](path string) []struct {
 	Name string
 	Obj  T
 } {
-	files := GetAllFilesInDirectory(path)
+	files := GetAllFilesInDirectory(path) // obtenir tous les fichiers dans le dossier
 	result := make([]struct {
 		Name string
 		Obj  T
-	}, len(files))
-	for i, file := range files {
+	}, len(files)) // créer un slice de struct
+	for i, file := range files { // pour chaque fichier
 		result[i] = struct {
 			Name string
 			Obj  T
@@ -57,18 +57,16 @@ func GetAllFilesInDirectoryToStruct[T any](path string) []struct {
 	return result
 }
 
-func TiledMapToImage(Map *tiled.Map) image.Image {
-	// You can also render the map to an in-memory image for direct
-	// use with the default Renderer, or by making your own.
-	renderer, err := render.NewRenderer(Map)
-	if err != nil {
+func TiledMapToImage(Map *tiled.Map) image.Image { // convertir une carte tiled en image
+	renderer, err := render.NewRenderer(Map) // créer un renderer
+	if err != nil {                          // si une erreur est survenue
 		fmt.Println("map unsupported for rendering: " + err.Error())
 		os.Exit(2)
 	}
 
 	// Render just layer 0 to the Renderer.
 	err = renderer.RenderVisibleLayers()
-	if err != nil {
+	if err != nil { // si une erreur est survenue
 		fmt.Println("layer unsupported for rendering: " + err.Error())
 		os.Exit(2)
 	}
@@ -76,10 +74,10 @@ func TiledMapToImage(Map *tiled.Map) image.Image {
 	return renderer.Result
 }
 
-func GetAllFilesInDirectoryToMap(path string) map[string]tiled.Map {
-	result := make(map[string]tiled.Map)
+func GetAllFilesInDirectoryToMap(path string) map[string]tiled.Map { // obtenir toutes les cartes tiled dans un dossier
+	result := make(map[string]tiled.Map) // créer une map de string vers tiled.Map
 
-	for _, file := range GetAllFilesInDirectory(path) {
+	for _, file := range GetAllFilesInDirectory(path) { // pour chaque fichier
 		gameMap, err := tiled.LoadFile(path + "/" + file)
 		if err != nil {
 			fmt.Println("error parsing map: " + err.Error())
@@ -90,19 +88,19 @@ func GetAllFilesInDirectoryToMap(path string) map[string]tiled.Map {
 	return result
 }
 
-func GetAllImagesInDirectory(path string) map[string]image.Image {
-	result := make(map[string]image.Image)
+func GetAllImagesInDirectory(path string) map[string]image.Image { // obtenir toutes les images dans un dossier
+	result := make(map[string]image.Image) // créer une map de string vers image.Image
 
-	for _, file := range GetAllFilesInDirectory(path) {
+	for _, file := range GetAllFilesInDirectory(path) { // pour chaque fichier
 		imgFile, err := os.Open(path + "/" + file)
-		if err != nil {
+		if err != nil { // si une erreur est survenue
 			fmt.Println("error opening image: " + err.Error())
 			os.Exit(2)
 		}
 		defer imgFile.Close()
 
 		img, _, err := image.Decode(imgFile)
-		if err != nil {
+		if err != nil { // si une erreur est survenue
 			fmt.Println("error decoding image: " + err.Error())
 			os.Exit(2)
 		}
@@ -111,11 +109,12 @@ func GetAllImagesInDirectory(path string) map[string]image.Image {
 	return result
 }
 
-func CheckCollision(box [6]float64, elements []*ETEStruct.Sprite, maxDist int) bool {
-	for _, element := range elements {
-		Box := ElementToBox(element)
-		if math.V2Distance([2]float64{box[4], box[5]}, [2]float64{Box[4], Box[5]}) <= float64(maxDist) {
-			if CheckIntersection([2][6]float64{box, Box}) {
+func CheckCollision(box [4]float64, elements []*ETEStruct.Sprite, maxDist float64, Unité int) bool { // vérifier si une boîte collisionne avec des éléments (maxDist en unités)
+	maxDist *= float64(Unité)
+	for _, element := range elements { // pour chaque élément
+		Box := ElementToBox(element)                                                            // obtenir la boîte de l'élément
+		if math.V2Distance([2]float64{box[2], box[3]}, [2]float64{Box[2], Box[3]}) <= maxDist { // si la distance entre les centres est inférieure à la distance maximale (en unités)
+			if CheckIntersection([2][4]float64{box, Box}, Unité) { // vérifier si les boîtes se chevauchent
 				return true
 			}
 		}
@@ -124,44 +123,45 @@ func CheckCollision(box [6]float64, elements []*ETEStruct.Sprite, maxDist int) b
 	return false
 }
 
-func CheckIntersection(boxs [2][6]float64) bool { // {witdh height  offsetX offsetY  PosX, PosY}
-	if boxs[0][1] == 0 {
-		if boxs[1][1] == 0 {
+func CheckIntersection(boxs [2][4]float64, Unité int) bool { // {witdh height  PosX, PosY}
+	unit := float64(Unité)
+	if boxs[0][1] == 0 { // si la hauteur est 0, c'est un cercle
+		if boxs[1][1] == 0 { // si la hauteur est 0, c'est un cercle
 			// Cercle vs Cercle
 
-			Obj0 := resolv.NewCircle(boxs[0][4], boxs[0][5], boxs[0][0])
-			Obj1 := resolv.NewCircle(boxs[1][4], boxs[1][5], boxs[1][0])
+			Obj0 := resolv.NewCircle(boxs[0][2]*unit, boxs[0][3]*unit, boxs[0][0]*unit)
+			Obj1 := resolv.NewCircle(boxs[1][2]*unit, boxs[1][3]*unit, boxs[1][0]*unit)
 
-			if !Obj0.Intersection(Obj1).IsEmpty() {
+			if !Obj0.Intersection(Obj1).IsEmpty() { // si les cercles se chevauchent
 				return true
 			}
-		} else {
+		} else { // sinon c'est un rectangle
 			// Cercle vs Rectangle
 
-			Obj0 := resolv.NewCircle(boxs[0][4], boxs[0][5], boxs[0][0])
-			Obj1 := resolv.NewRectangle(boxs[1][4], boxs[1][5], boxs[1][0], boxs[1][1])
+			Obj0 := resolv.NewCircle(boxs[0][2]*unit, boxs[0][3]*unit, boxs[0][0]*unit)
+			Obj1 := resolv.NewRectangle(boxs[1][2]*unit, boxs[1][3]*unit, boxs[1][0]*unit, boxs[1][1]*unit)
 
-			if !Obj0.Intersection(Obj1).IsEmpty() {
+			if !Obj0.Intersection(Obj1).IsEmpty() { // si le cercle et le rectangle se chevauchent
 				return true
 			}
 		}
-	} else {
-		if boxs[1][1] == 0 {
+	} else { // sinon c'est un rectangle
+		if boxs[1][1] == 0 { // si la hauteur est 0, c'est un cercle
 			//Rectangle vs Cercle
 
-			Obj0 := resolv.NewRectangle(boxs[0][4], boxs[0][5], boxs[0][0], boxs[0][1])
-			Obj1 := resolv.NewCircle(boxs[1][4], boxs[1][5], boxs[1][0])
+			Obj0 := resolv.NewRectangle(boxs[0][2]*unit, boxs[0][3]*unit, boxs[0][0]*unit, boxs[0][1]*unit)
+			Obj1 := resolv.NewCircle(boxs[1][2]*unit, boxs[1][3]*unit, boxs[1][0]*unit)
 
-			if !Obj0.Intersection(Obj1).IsEmpty() {
+			if !Obj0.Intersection(Obj1).IsEmpty() { // si le rectangle et le cercle se chevauchent
 				return true
 			}
-		} else {
+		} else { // sinon c'est un rectangle
 			// Rectangle vs Rectangle
 
-			Obj0 := resolv.NewRectangle(boxs[0][4], boxs[0][5], boxs[0][0], boxs[0][1])
-			Obj1 := resolv.NewRectangle(boxs[1][4], boxs[1][5], boxs[1][0], boxs[1][1])
+			Obj0 := resolv.NewRectangle(boxs[0][2]*unit, boxs[0][3]*unit, boxs[0][0]*unit, boxs[0][1]*unit)
+			Obj1 := resolv.NewRectangle(boxs[1][2]*unit, boxs[1][3]*unit, boxs[1][0]*unit, boxs[1][1]*unit)
 
-			if !Obj0.Intersection(Obj1).IsEmpty() {
+			if !Obj0.Intersection(Obj1).IsEmpty() { // si les rectangles se chevauchent
 				return true
 			}
 		}
@@ -169,6 +169,6 @@ func CheckIntersection(boxs [2][6]float64) bool { // {witdh height  offsetX offs
 	return false
 }
 
-func ElementToBox(element *ETEStruct.Sprite) [6]float64 {
-	return [6]float64{element.Box[0], element.Box[1], element.Box[2], element.Box[3], element.Pos[0] + element.Box[2], element.Pos[1] + element.Box[3]}
+func ElementToBox(element *ETEStruct.Sprite) [4]float64 { // convertir un sprite en boîte
+	return [4]float64{element.Box[0], element.Box[1], element.Pos[0] + element.Box[2], element.Pos[1] + element.Box[3]}
 }
